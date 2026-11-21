@@ -1,0 +1,6 @@
+# Files in .gitignore (node_modules, logs, config/assistant.yaml) are skipped already.
+package-lock.json
+tests/fixtures
+# Prompts and the commented example config are hand-laid-out; reformatting them is risk without gain.
+claude
+config

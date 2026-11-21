@@ -1,0 +1,9 @@
+{
+  "name": "desk",
+  "version": "0.2.0",
+  "description": "Work desk: open PRs by ticket with next steps, review queue, runs, and a standup draft in the owner's voice",
+  "types": "./types/index.d.ts",
+  "author": {
+    "name": "Tushar Jain"
+  }
+}

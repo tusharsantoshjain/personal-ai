@@ -1,0 +1,5 @@
+node_modules/
+config/assistant.yaml
+logs/*
+!logs/.gitkeep
+.DS_Store

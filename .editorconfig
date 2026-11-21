@@ -1,0 +1,16 @@
+# Editor defaults for every file, including those Prettier skips (bin/, claude/, config/).
+# Prettier also reads max_line_length, indent_size, indent_style and end_of_line; keep them equal to .prettierrc.
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+max_line_length = 120
+
+[*.md]
+# two trailing spaces are a line break in Markdown
+trim_trailing_whitespace = false

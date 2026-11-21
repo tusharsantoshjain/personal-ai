@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+SOURCE="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE" ]; do # `npm link` runs this through a symlink
+  TARGET="$(readlink "$SOURCE")"
+  case "$TARGET" in /*) SOURCE="$TARGET" ;; *) SOURCE="$(dirname "$SOURCE")/$TARGET" ;; esac
+done
+DIR="$(cd "$(dirname "$SOURCE")/.." && pwd)"
+exec node "$DIR/src/cli.ts" "$@"

@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Enabled by `npm install` (the prepare script sets core.hooksPath to .githooks). Skip once with `git commit --no-verify`.
+set -e
+cd "$(git rev-parse --show-toplevel)"
+# git sets GIT_DIR and GIT_INDEX_FILE for hooks; tests that run git in temp repos must not inherit them
+unset $(git rev-parse --local-env-vars)
+npm test --silent
+npm run typecheck --silent
+npm run format:check --silent

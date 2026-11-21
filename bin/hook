@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+# Claude Code hook entry (PreToolUse, PostToolUse, SubagentStop, SessionStart).
+# A cheap regex prefilter skips Node for calls that cannot matter. PreToolUse fails closed:
+# if Node crashes, the call asks instead of passing.
+DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+input="$(cat)"
+event=$(printf '%s' "$input" | grep -o '"hook_event_name" *: *"[A-Za-z]*"' | head -1 | sed -E 's/.*"([A-Za-z]*)"$/\1/')
+tool=$(printf '%s' "$input" | grep -o '"tool_name" *: *"[^"]*"' | head -1 | sed -E 's/.*"([^"]*)"$/\1/')
+
+if [ "$event" = "PreToolUse" ] || [ -z "$event" ]; then
+  case "$tool" in
+    Bash|PowerShell)
+      printf '%s' "$input" | grep -Eq 'git|gh |gh"|rm |rmdir|rimraf|find |aws |tofu|terraform|terragrunt|cdk |sam |kubectl|helm|gcloud|az |publish|dist-tag|gradle|mvn |twine|poetry|cargo|gem |docker|psql|mysql|mongo|sqlite|redis-cli|liquibase|flyway|DROP|drop |truncate|TRUNCATE|security |env|export|eval |bash |sh -c|zsh |>|tee|\.ssh|\.pem|\.key|credentials|npmrc|netrc|pgpass|xargs|source |cp |mv |install |ln |rsync|trash|cqlsh|eb |serverless|sls |copilot|amplify|deprecate|reset|set|id_|\.p12|\.pfx|scfw|pai"? done' || exit 0 ;;
+    Read)
+      printf '%s' "$input" | grep -Eq '\.env|\.netrc|\.pgpass|\.ssh/|id_rsa|id_ed25519|id_ecdsa|id_dsa|\.envrc|\.pem"|\.key"|\.p12"|\.pfx"|credentials|\.npmrc' || exit 0 ;;
+    Write|Edit|MultiEdit|NotebookEdit|Agent|Task) ;;
+    mcp__*)
+      printf '%s' "$tool" | grep -Eiq 'create|update|delete|send|post|add|edit|remove|transition|share|trash|publish|upload|archive|merge|assign|set|write|put|patch|move|rename|invite|schedule|reply|forward|complete|label|mark|apply|copy|append|insert|clear' || exit 0 ;;
+    *) exit 0 ;;
+  esac
+fi
+
+LOGS="${PAI_LOGS_DIR:-$DIR/logs}"
+mkdir -p "$LOGS"
+out=$(printf '%s' "$input" | node "$DIR/src/hook-main.ts" 2>>"$LOGS/hook-stderr.log")
+status=$?
+if [ $status -ne 0 ]; then
+  if [ "$event" = "PreToolUse" ] || [ -z "$event" ]; then
+    printf '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"ask","permissionDecisionReason":"Gate crashed (exit %s); asking instead (fail closed). See %s/hook-stderr.log."}}\n' "$status" "$LOGS"
+  fi
+  exit 0
+fi
+[ -n "$out" ] && printf '%s\n' "$out"
+exit 0

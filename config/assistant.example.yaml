@@ -1,0 +1,134 @@
+# Copy to config/assistant.yaml and fill in. assistant.yaml is gitignored.
+# Every gated category missing from approvals.levels is treated as "controlled".
+
+assistant:
+  name: Assistant
+  owner: Jane Doe
+  autonomy: controlled            # manual | assisted | controlled | autonomous
+  timezone: UTC
+  working_days: [Mon, Tue, Wed, Thu, Fri]
+  max_parallel_agents: 2
+  # model: opus                  # main-session model written to the workspace settings (default opus)
+  # effort: medium               # effort level written to the workspace settings (default medium)
+
+paths:
+  workspace: /home/jane/work
+  vault: /home/jane/work/Vault
+  assistant_repo: /home/jane/work/personal-ai
+  cache_dir: ~/.cache/personal-ai
+  logs_dir: /home/jane/work/personal-ai/logs
+  profile: /home/jane/work/assistant-profile.md
+  claude_projects: ~/.claude/projects
+  claude_project_slug: -home-jane-work
+
+vault:
+  folders:
+    inbox: 00-Inbox
+    dashboard: 01-Dashboard
+    people: 02-People
+    projects: 03-Projects
+    repositories: 04-Repositories
+    teams: 05-Teams
+    meetings: 06-Meetings
+    decisions: 07-Decisions
+    tasks: 08-Tasks
+    tracker: 09-Tracker
+    prs: 11-PRs
+    bugs: 12-Bugs
+    features: 13-Features
+    architecture: 14-Architecture
+    policies: 15-Policies
+    kpis: 16-KPIs
+    goals: 17-Goals
+    communication: 18-Communication
+    incidents: 19-Incidents
+    tech_debt: 20-Technical-Debt
+    timeline: 21-Timeline
+    daily: 21-Timeline/Daily
+    templates: 90-Templates
+    sources: 95-Sources
+    system: 99-System
+  type_folders:
+    person: people
+    project: projects
+    repository: repositories
+    team: teams
+    meeting: meetings
+    decision: decisions
+    task: tasks
+    ticket: tracker
+    pr: prs
+    bug: bugs
+    feature: features
+    architecture: architecture
+    policy: policies
+    kpi: kpis
+    goal: goals
+    incident: incidents
+    tech_debt: tech_debt
+  memory_folder: 99-System/Claude-Memory
+  runs_folder: 99-System/Runs
+  lint_exclude: [99-System/Claude-Memory, 95-Sources, 90-Templates, .obsidian, .git]
+
+github:
+  since: "2024-11-01"
+  stale_days: 3
+  protected_branches: [main, master, develop, staging, prod, "release/*"]
+  accounts:
+    - { login: jane-doe, orgs: [example-org] }
+
+tracker:
+  kind: jira
+  site: example.atlassian.net
+  projects: [ACME]
+  account_id: ""
+
+people:
+  self: Jane Doe
+  aliases: { jane-doe: Jane Doe }
+  bots: [github-actions, dependabot, "dependabot[bot]", sonarqubecloud, codecov]
+
+commit_formats:
+  default:
+    pattern: '^(ACME-\d+: |#noissue - )\S'
+    example: "ACME-123: Fix the login redirect"
+
+repositories:
+  - { name: api, path: api, org: example-org, project: ACME, stack: node-ts, default_branch: main, commit_format: default, purpose: "Backend API." }
+
+approvals:
+  ask_in_chat: true
+  levels:
+    git_commit: controlled
+    engine_edit: controlled   # edits to this repo's src/, bin/ and .githooks/ (the gate itself)
+    git_push: controlled
+    git_push_protected: never
+    git_force_push: never
+    gh_pr_create_ready: never
+    gh_pr_merge: never
+    gh_review_published: never
+  autonomous_allow: [git_commit, git_push, gh_pr_create_draft, gh_pr_edit, gh_comment]
+  frozen_paths:
+    - { pattern: "/legacy/", reason: "Legacy components are frozen." }
+
+writing:
+  banned_chars: ["\u2014", "\u2013"]
+  ai_attribution: ["co-authored-by: claude", "generated with claude", "generated with [claude code]", "noreply@anthropic.com"]
+  slop_phrases: ["i hope you are doing well", "i hope you're doing well", "feel free to reach out", "delve", "leverage", "great question"]
+  max_chars: { chat: 600, github_comment: 1200, tracker_comment: 1200, commit: 400, email: 1500 }
+
+session_start: { max_lines: 40, now_max_age_hours: 20 }
+
+integrations: { github: true, tracker: true, slack: false, gmail: false, calendar: false, error_tracking: false }
+
+polling: { prs_minutes: 30 }
+
+notifications: { only_actionable: true }
+
+kpis: []
+
+# Optional: standup reminder time (HH:MM, owner timezone) and days off (YYYY-MM-DD).
+standup: { days_off: [] }
+
+# Optional, per million tokens, used by `pai stats` for a cost estimate. Leave empty to skip cost.
+pricing: {}

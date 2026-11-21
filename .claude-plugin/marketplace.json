@@ -1,0 +1,11 @@
+{
+  "name": "personal-ai",
+  "owner": { "name": "Tushar Jain" },
+  "plugins": [
+    {
+      "name": "desk",
+      "source": "./mods/desk",
+      "description": "Work desk pane: PRs by ticket, review queue, runs, standup draft"
+    }
+  ]
+}
